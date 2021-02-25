@@ -44,7 +44,7 @@ const LanguageService = {
       )
       .where({ id: head_id })
       .first();
-  }
+  },
 }
 
 module.exports = LanguageService
