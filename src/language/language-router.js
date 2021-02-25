@@ -93,7 +93,9 @@ languageRouter
     });
 
     if (guess == linkedWords.head.value.translation) {
-      console.log('butts');
+      console.log(linkedWords.head.value.correct_count);
+      linkedWords.head.value.correct_count += 1;
+      console.log(linkedWords.head.value.correct_count);
     }
 
     res.send('good');
