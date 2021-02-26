@@ -45,6 +45,26 @@ const LanguageService = {
       .where({ id: head_id })
       .first();
   },
+
+  async makeLinkedlist(db, language_id, ll) {
+    const arr = await db
+      .from('word')
+      .select(
+        'id',
+        'language_id',
+        'original',
+        'translation',
+        'next',
+        'memory_value',
+        'correct_count',
+        'incorrect_count'
+      )
+      .where({ language_id });
+
+    arr.map((word) => ll.insertLast(word));
+
+    return arr;
+  },
 }
 
 module.exports = LanguageService

@@ -14,7 +14,7 @@ class LinkedList {
         this.head = new _Node(item, this.head);
     }
 
-    insert(item) {
+    insertLast(item) {
         if (this.head === null) {
             this.insertFirst(item);
         } else {
@@ -62,7 +62,7 @@ class LinkedList {
 
         let count = 1;
         let tempNode = this.head;
-        while (count < at - 1) {
+        while (count < at - 1 || tempNode.next !== null) {
             tempNode = tempNode.next;
             count++;
         }

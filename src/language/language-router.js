@@ -69,36 +69,48 @@ languageRouter
 languageRouter
   .post('/guess', jsonBodyParser, async (req, res, next) => {
     const { guess } = req.body;
-    const newGuess = xss(guess)
+    const postGuess = xss(guess)
 
-    if (!newGuess) {
+    if (!postGuess) {
       return res.status(400).send({
         error: `Missing 'guess' in request body`
       })
     }
 
-    let words = await LanguageService.getLanguageWords(
+    const linkedWords = new LinkedList();
+
+    const words = LanguageService.makeLinkedlist(
       req.app.get('db'),
       req.language.id,
+      linkedWords
     )
 
-    words.sort((a, b) => {
-      return (b.next != null) - (a.next != null) || a.next - b.next;
-    });
-
-    let linkedWords = new LinkedList;
-
-    words.forEach(word => {
-      linkedWords.insert(word);
-    });
-
-    if (guess == linkedWords.head.value.translation) {
-      console.log(linkedWords.head.value.correct_count);
-      linkedWords.head.value.correct_count += 1;
-      console.log(linkedWords.head.value.correct_count);
+    let response = {
+      answer: words[0].translation,
+      nextWord: words[1].original,
+      totalScore: req.language.total_score,
+      wordCorrectCount: words[1].correct_count,
+      wordIncorrectCount: words[1].incorrect_count,
+      isCorrect: false,
     }
 
-    res.send('good');
+    if (postGuess == linkedWords.head.value.translation) {
+      req.language.totalScore += 1;
+      linkedWords.head.value.correct_count += 1;
+      linkedWords.head.value.memory_value *= 2;
+
+      response = { ...response, isCorrect: true }
+    } else {
+      // console.log('failure');
+      linkedWords.head.value.incorrect_count += 1;
+      linkedWords.head.value.memory_value = 1;
+
+      response = { ...response, isCorrect: false }
+    }
+
+    //update database
+
+    return res.status(200).json({ response });
   })
 
 module.exports = languageRouter
