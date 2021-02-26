@@ -216,7 +216,7 @@ describe.only('Language Endpoints', function () {
         word => word.language_id === testLanguage.id
       )
 
-      it.skip(`responds with correct and moves head`, () => {
+      it(`responds with correct and moves head`, () => {
         const correctPostBody = {
           guess: testLanguagesWords[0].translation,
         }

@@ -68,49 +68,97 @@ languageRouter
 
 languageRouter
   .post('/guess', jsonBodyParser, async (req, res, next) => {
-    const { guess } = req.body;
-    const postGuess = xss(guess)
+    try {
+      const { guess } = req.body;
+      const postGuess = xss(guess)
+      console.log("tick");
 
-    if (!postGuess) {
-      return res.status(400).send({
-        error: `Missing 'guess' in request body`
-      })
+      if (!postGuess) {
+        return res.status(400).send({
+          error: `Missing 'guess' in request body`
+        })
+      }
+
+      const linkedWords = new LinkedList();
+
+      const words = await LanguageService.makeLinkedlist(
+        req.app.get('db'),
+        req.language.id,
+        linkedWords
+      )
+
+      const language = req.language;
+
+      let response = {
+        answer: words[0].translation,
+        nextWord: words[1].original,
+        totalScore: language.total_score,
+        wordCorrectCount: words[1].correct_count,
+        wordIncorrectCount: words[1].incorrect_count,
+        isCorrect: false,
+      }
+
+      if (postGuess == linkedWords.head.value.translation) {
+        language.totalScore += 1;
+        response.totalScore += 1;
+        linkedWords.head.value.correct_count += 1;
+        linkedWords.head.value.memory_value *= 2;
+
+        response = { ...response, isCorrect: true }
+      } else {
+        // console.log('failure');
+        linkedWords.head.value.incorrect_count += 1;
+        linkedWords.head.value.memory_value = 1;
+
+        response = { ...response, isCorrect: false }
+      }
+
+      let m = linkedWords.head.value.memory_value;
+
+      store = linkedWords.head;
+
+      while (store.next !== null && m > 0) {
+        //create store variables
+        let soriginal = store.value.original;
+        let stranslation = store.value.translation;
+        let scorrect_count = store.value.correct_count;
+        let sincorrect_count = store.value.incorrect_count;
+        let sm = store.value.memory_value;
+
+        //move positions based on mem val to new location
+        store.value.original = store.next.value.original;
+        store.value.translation = store.next.value.translation;
+        store.value.correct_count = store.next.value.correct_count;
+        store.value.incorrect_count = store.next.value.incorrect_count;
+        store.value.memory_value = store.next.value.memory_value;
+
+        //reassign values to correct positions
+        store.next.value.original = soriginal;
+        store.next.value.translation = stranslation;
+        store.next.value.correct_count = scorrect_count;
+        store.next.value.incorrect_count = sincorrect_count;
+        store.next.value.memory_value = sm;
+        store = store.next;
+        m--;
+      }
+
+      let arrTemp = linkedWords.head;
+
+      let linkedWordsArr = [];
+
+      while (arrTemp) {
+        linkedWordsArr.push(arrTemp.value);
+        arrTemp = arrTemp.next;
+      }
+
+      //update databases
+      LanguageService.insertNewLinkedList(req.app.get('db'), linkedWordsArr);
+      LanguageService.updateLanguagetotalScore(req.app.get('db'), language);
+
+      return res.json(response);
+    } catch (error) {
+      next(error);
     }
-
-    const linkedWords = new LinkedList();
-
-    const words = LanguageService.makeLinkedlist(
-      req.app.get('db'),
-      req.language.id,
-      linkedWords
-    )
-
-    let response = {
-      answer: words[0].translation,
-      nextWord: words[1].original,
-      totalScore: req.language.total_score,
-      wordCorrectCount: words[1].correct_count,
-      wordIncorrectCount: words[1].incorrect_count,
-      isCorrect: false,
-    }
-
-    if (postGuess == linkedWords.head.value.translation) {
-      req.language.totalScore += 1;
-      linkedWords.head.value.correct_count += 1;
-      linkedWords.head.value.memory_value *= 2;
-
-      response = { ...response, isCorrect: true }
-    } else {
-      // console.log('failure');
-      linkedWords.head.value.incorrect_count += 1;
-      linkedWords.head.value.memory_value = 1;
-
-      response = { ...response, isCorrect: false }
-    }
-
-    //update database
-
-    return res.status(200).json({ response });
   })
 
 module.exports = languageRouter
