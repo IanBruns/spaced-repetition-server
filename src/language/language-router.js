@@ -86,17 +86,19 @@ languageRouter
         linkedWords
       )
 
+      let lang = req.language
+
       let response = {
         answer: words[0].translation,
         nextWord: words[1].original,
-        totalScore: req.language.total_score,
+        totalScore: lang.total_score,
         wordCorrectCount: words[1].correct_count,
         wordIncorrectCount: words[1].incorrect_count,
         isCorrect: false,
       }
 
       if (postGuess == linkedWords.head.value.translation) {
-        req.language.totalScore += 1;
+        lang.totalScore += 1;
         response.totalScore += 1;
         linkedWords.head.value.correct_count += 1;
         linkedWords.head.value.memory_value *= 2;
@@ -151,7 +153,7 @@ languageRouter
 
       //update databases
       LanguageService.insertNewLinkedList(req.app.get('db'), linkedWordsArr);
-      LanguageService.updateLanguagetotalScore(req.app.get('db'), req.language);
+      LanguageService.updateLanguagetotalScore(req.app.get('db'), lang);
 
       return res.json(response);
     } catch (error) {
