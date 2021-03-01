@@ -1,7 +1,7 @@
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe.only('Language Endpoints', function () {
+describe('Language Endpoints', function () {
   let db
 
   const testUsers = helpers.makeUsersArray()
@@ -140,7 +140,7 @@ describe.only('Language Endpoints', function () {
   /**
    * @description Submit a new guess for the language
    **/
-  describe.only(`POST /api/language/guess`, () => {
+  describe(`POST /api/language/guess`, () => {
     const [testLanguage] = testLanguages
     const testLanguagesWords = testWords.filter(
       w => w.language_id === testLanguage.id
@@ -211,7 +211,7 @@ describe.only('Language Endpoints', function () {
       })
     })
 
-    context.only(`Given correct guess`, () => {
+    context(`Given correct guess`, () => {
       const testLanguagesWords = testWords.filter(
         word => word.language_id === testLanguage.id
       )
@@ -237,7 +237,7 @@ describe.only('Language Endpoints', function () {
 
       //Talked with TA sarkis, and this test doesn't account for the solution I had of manipulating
       //the database as opposed to the next pointers
-      it.skip(`moves the word 2 spaces, increases score and correct count`, async () => {
+      it(`moves the word 2 spaces, increases score and correct count`, async () => {
         let correctPostBody = {
           guess: testLanguagesWords[0].translation,
         }
