@@ -71,7 +71,6 @@ languageRouter
     try {
       const { guess } = req.body;
       const postGuess = xss(guess)
-      console.log("tick");
 
       if (!postGuess) {
         return res.status(400).send({
@@ -117,6 +116,7 @@ languageRouter
 
       store = linkedWords.head;
 
+      //Linked List manipulation
       while (store.next !== null && m > 0) {
         //create store variables
         let soriginal = store.value.original;
