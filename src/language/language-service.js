@@ -78,7 +78,7 @@ const LanguageService = {
 
   async updateLanguagetotalScore(db, language) {
     await db('language')
-      .where('user_id', '=', language.user_id)
+      .where({ user_id: language.user_id })
       .update(language);
   }
 }
