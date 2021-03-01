@@ -86,7 +86,10 @@ languageRouter
         linkedWords
       )
 
-      let lang = req.language
+      let lang = await LanguageService.getUsersLanguage(
+        req.app.get('db'),
+        req.user.id
+      );
 
       let response = {
         answer: words[0].translation,
