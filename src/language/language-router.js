@@ -101,7 +101,7 @@ languageRouter
       }
 
       if (postGuess == linkedWords.head.value.translation) {
-        lang.totalScore += 1;
+        lang.total_score += 1;
         response.totalScore += 1;
         linkedWords.head.value.correct_count += 1;
         linkedWords.head.value.memory_value *= 2;
